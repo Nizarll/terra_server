@@ -1,33 +1,51 @@
-local utils = terralib.includec("utils.h")
-local definitions = require("defs.t")
+local utils = terralib.includec("./utils.h")
+local definitions = require("defs")
 local Packet = {}
+Packet.__index = Packet
 
-function Packet.new(is_client_packet, data)
-  return setmetatable(Packet, {
-    is_client_packet = is_client_packet,
-    payload = payload,
+function Packet.new(data)
+  local self = setmetatable({
+    is_client_packet = false,
+    data = data,
+  }, Packet)
+  return self
+end
+
+local GameStatePacket = {}
+local PlayerStatePacket = {}
+local PlayerPositionPacket = {}
+local VfxPacket = {}
+
+local function serialize_data(field)
+  --serialize field
+end
+
+function GameStatePacket.new(State)
+  return Packet.new(State)
+end
+
+--@Vfx.new
+--@Params {Vector2, String type | VfxType : struct}
+function VfxPacket.new(Position, Type)
+  return Packet.new(false, {
+    position = Position,
+    type = Type,
   })
 end
 
-function Packet:serialize()
-  if self.data == null then
-    return null
-  end
-  local bytes = {}
-  for index, field in pairs(self.data) do
-    bytes[index] = serialize_field(field)
-  end
-  return bytes
+function VfxPacket:serialize()
+  local bytes = {
+    serialize_data("VfxPacket"),
+    serialize_data(self.position.x),
+    serialize_data(self.position.y),
+    serialize_data(self.type),
+  }
 end
 
-function serialize_field(field)
-  field:gettobytes()
-  -- serialize the field
-  return null
-end
-
-function deserialize()
-
-end
-
-return Packet
+return {
+  ["Packet"] = Packet,
+  ["GameStatePacket"] = GameStatePacket,
+  ["PlayerStatePacket"] = PlayerStatePacket,
+  ["PlayerPositionPacket"] = PlayerPositionPacket,
+  ["VfxPacket"] = VfxPacket,
+}
