@@ -1,0 +1,7 @@
+return {
+  DISALLOW_CON = 0x00,
+  ALLOW_CON = 0x01,
+  P_DISCONNECT = 0x02,
+  P_CONNECT = 0x03,
+  P_STATE = 0x04,
+}
