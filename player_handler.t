@@ -1,4 +1,5 @@
 local Player = {}
+Player.__index = Player
 local Vector2 = {}
 local player_handler = {}
 
@@ -33,4 +34,4 @@ function player_handler.register_player(player)
   player_handler[player.id] = player
 end
 
-return player_handler
+return { ["handler"] = player_handler, ["constructor"] = Player }
