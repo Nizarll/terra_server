@@ -4,4 +4,5 @@ return {
   P_DISCONNECT = 0x02,
   P_CONNECT = 0x03,
   P_STATE = 0x04,
+  CLIENT_INPUT = 0x05,
 }

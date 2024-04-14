@@ -1,14 +1,6 @@
-local types = require("packet_types")
+local types = require("libs.packet_types")
 local Packet = {}
 Packet.__index = Packet
-
-function Packet.new(type, data)
-  assert(type, "[x] ERROR: INVALID PACKET TYPE !")
-  return setmetatable({
-    type = type,
-    data = data,
-  }, Packet)
-end
 
 --[[
 -- CLIENT PACKETS:
@@ -36,6 +28,18 @@ end
 -- }
 --
 --]]
+
+function Packet.new(type, data)
+  assert(type, "[x] ERROR: INVALID PACKET TYPE !")
+  return setmetatable({
+    type = type,
+    data = data,
+  }, Packet)
+end
+
+function Packet.deserialize(payload)
+  return { payload[1], payload[2], }
+end
 
 local function concat_table(t1, t2)
   for i, v in pairs(t2) do

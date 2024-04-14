@@ -21,11 +21,13 @@ end
 
 function Player.new(position)
   assert(position, "player constructor needs to be assigned a position")
+  assert(position.x, "player constructor needs to be assigned a position")
+  assert(position.y, "player constructor needs to be assigned a position")
   local self
   self = setmetatable({
     id = get_random_id(),
     position = position,
-    state = IdleState.new(self, "left"),
+    state = IdleState.new(self, "left")
   }, Player)
   return self
 end
@@ -46,7 +48,7 @@ function Player:serialize()
   -- serialize
   local bytes = {}
   table.insert(bytes, self.id)
-  table.insert(bytes, self.state.type or States.INVALID_STATE)
+  table.insert(bytes, self.state.type or states.INVALID_STATE)
   concat_table(bytes, self.position:serialize())
   return bytes
 end

@@ -6,15 +6,16 @@ IdleState.__index = IdleState
 local AttackState = {}
 AttackState.__index = AttackState
 
-local state_enum = {
+states = {
   S_INVALID = 0x00,
-  S_WALK = 0x01,
-  S_ATTACK = 0x02,
+  S_IDLE = 0x01,
+  S_WALK = 0x02,
+  S_ATTACK = 0x03,
 }
 
 function AttackState.new(owner, direction)
   return setmetatable({
-    type = state_enum.S_ATTACK,
+    type = states.S_ATTACK,
     owner = owner,
     direction = direction,
   }, AttackState)
@@ -22,7 +23,7 @@ end
 
 function WalkState.new(owner, direction)
   return setmetatable({
-    type = state_enum.S_WALK,
+    type = states.S_WALK,
     owner = owner,
     direction = direction,
   }, WalkState)
@@ -30,7 +31,7 @@ end
 
 function IdleState.new(owner, direction)
   return setmetatable({
-    type = state_enum.S_IDLE,
+    type = states.S_IDLE,
     owner = owner,
     direction = direction
   }, IdleState)
@@ -66,10 +67,10 @@ function IdleState:handle_input()
   return nil
 end
 
-local return_result = { WalkState, IdleState, AttackState }
-
-for estate, value in pairs(state_enum) do
-  return_result[estate] = value
-end
+local return_result = {
+  ["WalkState"] = WalkState,
+  ["IdleState"] = IdleState,
+  ["AttackState"] = AttackState
+}
 
 return return_result

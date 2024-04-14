@@ -22,7 +22,7 @@ function Vector2:sub(vector)
   self.y = self.y - vector.y
 end
 
-function Vector2:mul(vector)
+function Vector2:dot(vector)
   assert(vector.x, "Vector does not have an x field")
   assert(vector.y, "Vector does not have a y field")
   self.x = self.x * vector.x
