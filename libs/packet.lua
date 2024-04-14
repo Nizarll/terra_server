@@ -2,6 +2,7 @@ local types = require("libs.packet_types")
 local Packet = {}
 Packet.__index = Packet
 
+pressedkey = 0
 --[[
 -- CLIENT PACKETS:
 --
@@ -37,8 +38,15 @@ function Packet.new(type, data)
   }, Packet)
 end
 
+function Packet.print(p) {
+  if pressedkey == p[0] then return end
+  pressedkey = p[0]
+  print("Input Packet: ".."\n\tKey: "..string.char(p[1]).."\n\tState: " .. (p[1] and "pressed" or "released"))
+}
+
 function Packet.deserialize(payload)
-  return { payload[1], payload[2], }
+  local bytes = { string.byte(data, 1, -1) }
+  return bytes
 end
 
 local function concat_table(t1, t2)

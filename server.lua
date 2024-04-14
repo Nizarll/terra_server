@@ -12,8 +12,8 @@ end
 while true do
   local data, ip, port = udp:receivefrom()
   if data then
-    local recv_packet = packet.deserialize(data)
-    print_p(recv_packet)
+    local recv_bytes = packet.deserialize(data)
+    packet.print_p(recv_packet)
   end
   socket.select(nil, nil, .01)
 end
