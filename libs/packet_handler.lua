@@ -1,29 +1,31 @@
-local Vector2 = require('libs.vector2')
-local Collideable = require('libs.collideable')
 local PacketHandler = {}
+PacketHandler.__index = PacketHandler
+
+local PlayerHandler = require 'libs.player_handler'
+local Vector2 = require 'libs.vector2'
+local Collideable = require 'libs.collideable'
+local types = require 'libs.packet_types'
 
 local Flags = {
   GROUND = 0x00,
 }
 local objects = {
-  Ground = Collideable.new(Vector2.new(0, 0), Vector2.new(0, 10), Flags.GROUND)
+  Ground = Collideable.new(Vector2.new(0, 0), Vector2.new(0, 10), Flags.GROUND),
 }
 
 function PacketHandler.new(socket)
   return setmetatable({
-    players = {},
     socket = socket
   }, PacketHandler)
 end
 
 function PacketHandler:send(packet)
-  for _, player in ipairs(self.players) do
+  for _, player in ipairs(PlayerHandler.player_ids) do
     self.socket:sendto(packet:serialize(), player.address.ip, player.address.port)
   end
 end
 
 function PacketHandler:handle_packet(player, packet)
-  if packet.typ
   if packet.key_pressed == 'd' then
     player:set_position(
       Vector.new(
