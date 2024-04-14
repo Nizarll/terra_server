@@ -1,11 +1,27 @@
 local Vector2 = {}
 Vector2.__index = Vector2
+Vector2.__mul = function(a, b)
+  return setmetatable({
+    x = a.x * b.x,
+    y = a.y * b.y
+  }, Vector2)
+end
+Vector2.__add = function(a, b)
+  return setmetatable({
+    x = a.x + b.x,
+    y = a.y + b.y
+  }, Vector2)
+end
 
 function Vector2.new(x, y)
   return setmetatable({
     x = x,
     y = y,
   }, Vector2)
+end
+
+function Vector2:tostring()
+  return 'Vector2: {x: ' .. self.x .. ' , ' .. 'y: ' .. self.y .. '}'
 end
 
 function Vector2:add(vector)
