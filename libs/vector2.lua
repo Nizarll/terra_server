@@ -31,10 +31,10 @@ end
 
 function Vector2:serialize()
   local bytes = {}
-  table.insert(bytes, self.x & 0xff)
-  table.insert(bytes, self.x & 0xff00)
-  table.insert(bytes, self.y & 0xff)
-  table.insert(bytes, self.y & 0xff00)
+  table.insert(bytes, math.floor(self.x) & 0xff)
+  table.insert(bytes, math.floor(self.x) & 0xff00)
+  table.insert(bytes, math.floor(self.y) & 0xff)
+  table.insert(bytes, math.floor(self.y) & 0xff00)
   return bytes
 end
 

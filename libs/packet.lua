@@ -2,7 +2,15 @@ local types = require("libs.packet_types")
 local Packet = {}
 Packet.__index = Packet
 
-pressedkey = 0
+local key_pressed = 0
+local key_state = 0
+
+local function concat_table(t1, t2)
+  for i, v in pairs(t2) do
+    table.insert(t1, v)
+  end
+end
+
 --[[
 -- CLIENT PACKETS:
 --
@@ -38,20 +46,20 @@ function Packet.new(type, data)
   }, Packet)
 end
 
-function Packet.print(p) {
-  if pressedkey == p[0] then return end
-  pressedkey = p[0]
-  print("Input Packet: ".."\n\tKey: "..string.char(p[1]).."\n\tState: " .. (p[1] and "pressed" or "released"))
-}
-
 function Packet.deserialize(payload)
   local bytes = { string.byte(data, 1, -1) }
-  return bytes
+  return Packet.new(types.CLIENT_INPUT, {
+    key_pressed = (bytes[1] == 0x8f and 'mb2') or (bytes[1] == 0x8e and 'mb1')
+        or string.lower(string.char(bytes[1])),
+    key_state = bytes[2] == 0 and 'pressed' or 'released'
+  })
 end
 
-local function concat_table(t1, t2)
-  for i, v in pairs(t2) do
-    table.insert(t1, v)
+function Packet:print()
+  --print
+  if self.type == types.CLIENT_INPUT then
+    print("PACKET PRINT : CLIENT INPUT\n" .. "\tkey:" .. string.char(self.data.key_pressed)
+      .. "\n\tstate:" .. self.data.key_state)
   end
 end
 
@@ -67,13 +75,4 @@ function Packet:serialize()
   end
 end
 
-local function dump_table(table)
-  local s = "TABLE DUMP:\n"
-  for i, item in pairs(table) do
-    if type(item) == "table" then
-      dump_table(item)
-    end
-    s = s .. "[" .. i .. "]: " .. item .. "\n"
-  end
-  print(s)
-end
+return Packet
