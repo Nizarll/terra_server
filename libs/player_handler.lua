@@ -2,8 +2,8 @@ local States = require 'state'
 local Vector2 = require 'vector2'
 local WalkState, IdleState, AttackState = States.WalkState, States.IdleState, States.AttackState
 local Player = {}
-Player.__index = Player
 local player_handler = {}
+Player.__index = Player
 
 local function concat_table(t1, t2)
   for i, v in pairs(t2) do
@@ -19,7 +19,7 @@ local function get_random_id()
   return id
 end
 
-function Player.new(position)
+function Player.new(ip, port, position)
   assert(position, "player constructor needs to be assigned a position")
   assert(position.x, "player constructor needs to be assigned a position")
   assert(position.y, "player constructor needs to be assigned a position")
@@ -28,6 +28,7 @@ function Player.new(position)
     id = get_random_id(),
     position = position,
     state = IdleState.new(self, "left")
+    self.address = {ip = ip, port = port}
   }, Player)
   return self
 end

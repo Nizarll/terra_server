@@ -2,15 +2,6 @@ local types = require("libs.packet_types")
 local Packet = {}
 Packet.__index = Packet
 
-local key_pressed = 0
-local key_state = 0
-
-local function concat_table(t1, t2)
-  for i, v in pairs(t2) do
-    table.insert(t1, v)
-  end
-end
-
 --[[
 -- CLIENT PACKETS:
 --
@@ -38,6 +29,16 @@ end
 --
 --]]
 
+
+local key_pressed = 0
+local key_state = 0
+
+local function concat_table(t1, t2)
+  for i, v in pairs(t2) do
+    table.insert(t1, v)
+  end
+end
+
 function Packet.new(type, data)
   assert(type, "[x] ERROR: INVALID PACKET TYPE !")
   return setmetatable({
@@ -48,6 +49,12 @@ end
 
 function Packet.deserialize(payload)
   local bytes = { string.byte(data, 1, -1) }
+  local type = bytes[1]
+
+  if type == types.DEMAND_CON then
+    return Packet.new(types.DEMAND_CON)
+  end
+
   return Packet.new(types.CLIENT_INPUT, {
     key_pressed = (bytes[1] == 0x8f and 'mb2') or (bytes[1] == 0x8e and 'mb1')
         or string.lower(string.char(bytes[1])),
