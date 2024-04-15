@@ -1,6 +1,9 @@
 local PacketHandler = {}
 PacketHandler.__index = PacketHandler
 
+local _ = require 'libs.ansi'
+local Packet = require 'libs.packet'
+local State = require 'libs.state'
 local PlayerHandler = require 'libs.player_handler'
 local Vector2 = require 'libs.vector2'
 local Collideable = require 'libs.collideable'
@@ -13,6 +16,20 @@ local objects = {
   Ground = Collideable.new(Vector2.new(0, 0), Vector2.new(0, 10), Flags.GROUND),
 }
 
+local function log_packet(packet, ignore)
+  if ignore and #ignore > 0 then
+    print('[x] - sent packet to all players: but: ' .. ANSI_COLOR_BRIGHT_YELLOW)
+    for id, _ in ipairs(ignore) do
+      print(id .. ' ')
+    end
+    print(ANSI_COLOR_RESET .. ANSI_STYLE_UNDERLINE
+      .. packet:get_name() .. ANSI_COLOR_RESET)
+    return
+  end
+  print('[x] - sent packet to all players: ' .. ANSI_STYLE_UNDERLINE
+    .. packet:get_name() .. ANSI_COLOR_RESET)
+end
+
 function PacketHandler.new(socket)
   return setmetatable({
     socket = socket
@@ -20,20 +37,21 @@ function PacketHandler.new(socket)
 end
 
 function PacketHandler:send(packet, ignore)
-  for id, player in ipairs(PlayerHandler.player_ids) do
-    if not ignore[id] then
-      self.socket:sendto(packet:serialize(), player.address.ip, player.address.port)
+  log_packet(packet, ignore)
+  for id, player in ipairs(PlayerHandler.get_player_ids()) do
+    if not ignore or (ignore and not ignore[id]) then
+      self.socket:sendto(string.char(table.unpack(packet:serialize())), player.address.ip, player.address.port)
     end
   end
 end
 
 function PacketHandler:handle_packet(player, packet)
-  if packet.key_pressed == 'd' then
-    player:set_position(player.position + Vector2.new(.01, 0))
-    return
-  end
-  if packet.key_pressed == 'a' then
-    player:set_position(player.position + Vector2.new(-.01, 0))
+  if player and packet.data.key_pressed and packet.data.key_pressed == 'd' or packet.data.key_pressed == 'a' then
+    player:set_state(State["WalkState"].new(
+      player,
+      packet.data.key_pressed == 'd' and 'right' or 'left'
+    ))
+    self:send(Packet.new(types.STATE, { owner = player }))
     return
   end
 end

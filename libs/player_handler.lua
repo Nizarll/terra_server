@@ -1,6 +1,13 @@
 local player_handler = {}
+local player_ids = {}
 
-player_handler.player_ids = {}
+function player_handler.get_random_id()
+  local id = math.random(0, 255)
+  if player_ids[id] then
+    return get_random_id()
+  end
+  return id
+end
 
 local function concat_table(t1, t2)
   for i, v in pairs(t2) do
@@ -10,6 +17,10 @@ end
 
 function player_handler.get_player_by_id(id)
   return player_ids[player.id]
+end
+
+function player_handler.get_player_ids()
+  return player_ids
 end
 
 function player_handler.register_player(player)

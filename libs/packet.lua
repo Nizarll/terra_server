@@ -29,10 +29,6 @@ Packet.__index = Packet
 --
 --]]
 
-
-local key_pressed = 0
-local key_state = 0
-
 local function concat_table(t1, t2)
   for i, v in pairs(t2) do
     table.insert(t1, v)
@@ -48,13 +44,16 @@ function Packet.new(type, data)
 end
 
 function Packet.deserialize(payload)
-  local bytes = { string.byte(data, 1, -1) }
+  local bytes = payload
+  if type(payload) == 'string'
+  then
+    bytes = { string.byte(payload, 1, -1) }
+  end
   local type = bytes[1]
-
+  if not type then return end
   if type == types.DEMAND_CON then
     return Packet.new(types.DEMAND_CON)
   end
-
   return Packet.new(types.CLIENT_INPUT, {
     key_pressed = (bytes[1] == 0x8f and 'mb2') or (bytes[1] == 0x8e and 'mb1')
         or string.lower(string.char(bytes[1])),
@@ -63,23 +62,35 @@ function Packet.deserialize(payload)
 end
 
 function Packet:print()
-  --print
   if self.type == types.CLIENT_INPUT then
-    print("PACKET PRINT : CLIENT INPUT\n" .. "\tkey:" .. string.char(self.data.key_pressed)
+    print("PACKET PRINT : CLIENT INPUT\n" .. "\tkey:" .. self.data.key_pressed
       .. "\n\tstate:" .. self.data.key_state)
   end
 end
 
+function Packet:get_name()
+  if self.type == types.DEMAND_CON then return 'DEMAND_CON' end
+  if self.type == types.ALLOW_CON then return 'ALLOW_CON' end
+  if self.type == types.CONNECT then return 'CONNECT' end
+  if self.type == types.DISCONNECT then return 'DISCONNECT' end
+  if self.type == types.STATE then return 'STATE' end
+  return 'unimplemented'
+end
+
 function Packet:serialize()
   local bytes = {}
-  if self.type == types.P_STATE or self.type == types.P_CONNECT or self.type == types.P_DISCONNECT then
+  table.insert(bytes, self.type)
+  if self.type == types.CONNECT or self.type == types.ALLOW_CON then
+    table.insert(bytes, self.data.id)
+    return bytes
+  end
+  if self.type == types.STATE then
     assert(self.data.owner, "[x] ERROR: INVALID PACKET FORMAT SERIALIZATION !")
-    assert(self.data.state, "[x] ERROR: INVALID PACKET FORMAT SERIALIZATION !")
-    table.insert(bytes, self.type)
     concat_table(bytes, self.data.owner:serialize())
     --concat_table(bytes, self.data.owner.position)
     return bytes
   end
+  return bytes
 end
 
 return Packet
