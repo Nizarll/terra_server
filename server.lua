@@ -14,8 +14,12 @@ assert(udp:setsockname('127.0.0.1', port),
 udp:settimeout(1)
 
 local packet_handler = PacketHandler.new(udp)
+
+local players = {}
+
 local function player_login(ip, port)
   local player = Player.new(ip, port, Vector2.new(10, 10)
+  players[ip..port] = player
   PlayerHandler.register_player(player)
   udp:sendto(
     Packet.new(types.ALLOW_CON, {}):deserialize(),
@@ -34,6 +38,8 @@ while true do
     local recv_packet = packet.deserialize(data)
     if recv_packet.type == types.DEMAND_CON then
       register_player(ip, port)
+    else
+      packet_handler:handle_packet(players[ip..port], recv_packet)
     end
   end
   socket.select(nil, nil, .01)
