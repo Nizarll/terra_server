@@ -40,7 +40,7 @@ end
 
 local function compute_gravity(player)
   if player.position <= 10 then return end
-  player.position.y -= .01
+  player.position.y = player.position.y - 0.1
 end
 
 -- add other packet handling
