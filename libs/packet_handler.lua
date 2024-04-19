@@ -37,23 +37,28 @@ function PacketHandler.new(socket)
 end
 
 function PacketHandler:send(packet, ignore)
-  log_packet(packet, ignore)
-  for id, player in ipairs(PlayerHandler.get_player_ids()) do
+  local t = PlayerHandler.get_player_ids()
+  for id, player in pairs(PlayerHandler.get_player_ids()) do
     if not ignore or (ignore and not ignore[id]) then
-      self.socket:sendto(string.char(table.unpack(packet:serialize())), player.address.ip, player.address.port)
+      --print(table.unpack(packet:serialize()))
+      self.socket:sendto(string.char(table.unpack(packet:serialize())),
+        player.address.ip, player.address.port)
     end
   end
 end
 
 function PacketHandler:handle_packet(player, packet)
-  if player and packet.data.key_pressed and packet.data.key_pressed == 'd' or packet.data.key_pressed == 'a' then
-    player:set_state(State["WalkState"].new(
-      player,
-      packet.data.key_pressed == 'd' and 'right' or 'left'
-    ))
-    self:send(Packet.new(types.STATE, { owner = player }))
-    return
-  end
+  if not player then return end
+  if not packet.data.key_pressed then return end
+  player.position = player.position + Vector2.new(
+    packet.data.key_pressed == 'd' and 4 or -4
+    , 0)
+  player:set_state(State["WalkState"].new(
+    player,
+    packet.data.key_pressed == 'd' and 'right' or 'left'
+  ))
+  self:send(Packet.new(types.STATE, { owner = player }))
+  return
 end
 
 local function compute_gravity(player)

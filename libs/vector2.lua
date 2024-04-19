@@ -45,12 +45,12 @@ function Vector2:dot(vector)
   self.y = self.y * vector.y
 end
 
-function Vector2:serialize()
+function Vector2:serialize() -- Vector2 : int x, int y
   local bytes = {}
-  table.insert(bytes, math.floor(self.x) & 0xff)
-  table.insert(bytes, math.floor(self.x) & 0xff00)
+  table.insert(bytes, math.floor(self.x) & 0x00ff)
+  table.insert(bytes, (math.floor(self.x) & 0xff00) >> 8)
   table.insert(bytes, math.floor(self.y) & 0xff)
-  table.insert(bytes, math.floor(self.y) & 0xff00)
+  table.insert(bytes, (math.floor(self.y) & 0xff00) >> 8)
   return bytes
 end
 

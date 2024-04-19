@@ -23,20 +23,35 @@ local function handle_login(ip, port)
   local player = Player.new(ip, port, Vector2.new(10, 10))
   players[ip .. port] = player
   PlayerHandler.register_player(player)
-  udp:sendto(
-    string.char(table.unpack(Packet.new(types.ALLOW_CON, {
-      id = player.id
-    }):serialize())),
-    ip,
-    port
-  )
+  local did_send = nil
+  repeat
+    did_send = udp:sendto(
+      string.char(table.unpack(Packet.new(types.ALLOW_CON, {
+        id = player.id
+      }):serialize())),
+      ip,
+      port
+    )
+  until did_send
   packet_handler:send(
     Packet.new(types.CONNECT, { id = player.id }),
     { [player.id] = true }
   )
   print(ANSI_COLOR_BRIGHT_GREEN .. 'Player joined the server with ip : ' ..
-    ANSI_STYLE_UNDERLINE .. ip .. ':'
+    ANSI_STYLE_UNDERLINE .. ANSI_COLOR_WHITE .. ANSI_COLOR_GREEN .. ip .. ':'
     .. port .. ANSI_COLOR_RESET)
+end
+
+local function handle_logout(ip, port)
+  if not players[ip .. port] then
+    return
+  end
+  PlayerHandler.unregister_player(players[ip .. port])
+  print(ANSI_COLOR_BRIGHT_RED .. 'Player with id: '
+    .. ANSI_STYLE_UNDERLINE .. players[ip .. port].id
+    .. ANSI_COLOR_WHITE .. ANSI_COLOR_RESET .. ANSI_COLOR_BRIGHT_RED .. ' left the server ! '
+    .. ANSI_COLOR_RESET)
+  players[ip .. port] = nil
 end
 
 while true do
@@ -45,6 +60,10 @@ while true do
     local recv_packet = Packet.deserialize(data)
     if recv_packet.type == types.DEMAND_CON then
       handle_login(ip, port)
+      goto continue
+    end
+    if recv_packet.type == types.DEMAND_DISCON then
+      handle_logout(ip, port)
       goto continue
     end
     packet_handler:handle_packet(players[ip .. port], recv_packet)

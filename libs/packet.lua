@@ -51,14 +51,14 @@ function Packet.deserialize(payload)
   end
   local type = bytes[1]
   if not type then return end
-  if type == types.DEMAND_CON then
-    return Packet.new(types.DEMAND_CON)
+  if type == types.DEMAND_CON or type == types.DEMAND_DISCON then
+    return Packet.new(type)
   end
-  return Packet.new(types.CLIENT_INPUT, {
-    key_pressed = (bytes[1] == 0x8f and 'mb2') or (bytes[1] == 0x8e and 'mb1')
-        or string.lower(string.char(bytes[1])),
-    key_state = bytes[2] == 0 and 'pressed' or 'released'
+  local p = Packet.new(types.CLIENT_INPUT, {
+    key_pressed = string.lower(string.char(bytes[2])),
+    key_state = bytes[3] == 0 and 'pressed' or 'released'
   })
+  return p
 end
 
 function Packet:print()

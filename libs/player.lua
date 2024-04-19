@@ -1,10 +1,10 @@
+local Tools = require 'libs.tools'
 local States = require 'libs.state'
 local PlayerHandler = require 'libs.player_handler'
 local Vector2 = require 'libs.vector2'
 local WalkState, IdleState, AttackState = States.WalkState, States.IdleState, States.AttackState
 local Player = {}
 Player.__index = Player
-
 
 
 function Player.new(ip, port, position)
@@ -42,11 +42,11 @@ function Player:set_state(state)
 end
 
 function Player:serialize()
-  local bytes = {}
+  local bytes = {} -- 0 -> type, 1 -> id, 2, dir,
   table.insert(bytes, self.state.type or states.INVALID_STATE)
   table.insert(bytes, self.id)
   table.insert(bytes, self.state.direction == 'left' and 0x00 or 0x01)
-  concat_table(bytes, self.position:serialize())
+  Tools.concat_table(bytes, self.position:serialize())
   return bytes
 end
 
