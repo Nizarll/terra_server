@@ -53,6 +53,7 @@ function PacketHandler:handle_packet(player, packet)
   player.position = player.position + Vector2.new(
     packet.data.key_pressed == 'd' and 4 or -4
     , 0)
+  print(player.position:tostring())
   player:set_state(State["WalkState"].new(
     player,
     packet.data.key_pressed == 'd' and 'right' or 'left'

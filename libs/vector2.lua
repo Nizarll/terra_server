@@ -1,4 +1,5 @@
 local Vector2 = {}
+local BYTE = 8
 Vector2.__index = Vector2
 Vector2.__mul = function(a, b)
   return setmetatable({
@@ -47,10 +48,10 @@ end
 
 function Vector2:serialize() -- Vector2 : int x, int y
   local bytes = {}
-  table.insert(bytes, math.floor(self.x) & 0x00ff)
-  table.insert(bytes, (math.floor(self.x) & 0xff00) >> 8)
+  table.insert(bytes, math.floor(self.x) & 0xff)
+  table.insert(bytes, (math.floor(self.x) & 0xff00) >> 1 * BYTE)
   table.insert(bytes, math.floor(self.y) & 0xff)
-  table.insert(bytes, (math.floor(self.y) & 0xff00) >> 8)
+  table.insert(bytes, (math.floor(self.y) & 0xff00) >> 1 * BYTE)
   return bytes
 end
 
