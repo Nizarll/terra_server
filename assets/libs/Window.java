@@ -36,11 +36,16 @@ public class Window {
         panel.setVisible(true);
         panel.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
         panel.setDoubleBuffered(true);
-        jframe.add(new Menu());
-        //jframe.add(panel);
+        Menu m = new Menu(jframe, _e -> {
+            jframe.add(panel);
+        });
+        jframe.add(m);
         return panel;
     }
 
+    public GamePanel get_panel() {
+        return this.panel;
+    }
 
     public void add_keylistener(KeyListener l) {
         this.listeners.add(l);

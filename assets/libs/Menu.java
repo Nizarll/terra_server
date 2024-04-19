@@ -15,9 +15,10 @@ import java.util.function.Consumer;
 
 import javax.swing.Timer;
 import javax.imageio.ImageIO;
+import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-public class Menu<T> extends JPanel {
+public class Menu extends JPanel {
 
     private int HEIGHT = (int) (126 * .6);
     private int WIDTH = (int) (1135 * .6);
@@ -30,16 +31,14 @@ public class Menu<T> extends JPanel {
     public static Image title;
     private double y = 0;
     private double s = 0;
-    private Vector2 position = new Vector2(WIDTH, HEIGHT);
+    private Vector2 position;
     private Vector2 size = new Vector2(1, 1);
     public double easeInOutQuad(double x) {
         return (x < 0.5) ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2;
     }
-
-    private Consumer action;
-
-    public Menu(Consumer<T> action) {
-        this.action = action;
+    private Menu menu;
+    public Menu(JFrame frame, Consumer action) {
+        this.menu = this;
         try {
             System.out.println(TITLE_PATH);
             title = ImageIO.read(new File(TITLE_PATH));
@@ -52,13 +51,16 @@ public class Menu<T> extends JPanel {
             Thread t = new Thread(new Runnable(){
                 @Override
                 public void run() {
-                    s = 1;
-                    try {Thread.sleep(800);
+                    s = .25;
+                    try {Thread.sleep(100);
                     s = 0;
+                    Thread.sleep(100);
                     } catch (Exception e){}
+                    frame.remove(menu);
                     action.accept(null);
                 }
             });
+            t.start();
            } 
         });
         this.addMouseMotionListener(new MouseMotionAdapter() {
@@ -107,6 +109,8 @@ public class Menu<T> extends JPanel {
             }
         });
         curr.start();
+        this.position = new Vector2(getWidth() / 2 - WIDTH / 2, getHeight() / 2);
+        paint(getGraphics());
     }
 
     protected void paintComponent(Graphics g) {
