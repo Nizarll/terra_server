@@ -1,6 +1,8 @@
 package assets.libs;
 
 import javax.swing.JPanel;
+
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.KeyListener;
 import java.util.ArrayList;
@@ -21,6 +23,8 @@ public class Window {
     }
     public JPanel build() {
         JFrame jframe = new JFrame();
+        jframe.setBackground(new Color(255, 255, 255));
+        jframe.setForeground(new Color(255, 255, 255));
         jframe.setSize(new Dimension((int) SCREEN_WIDTH, (int) SCREEN_HEIGHT));
         jframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         jframe.setResizable(true);
@@ -32,7 +36,8 @@ public class Window {
         panel.setVisible(true);
         panel.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
         panel.setDoubleBuffered(true);
-        jframe.add(panel);
+        jframe.add(new Menu());
+        //jframe.add(panel);
         return panel;
     }
 

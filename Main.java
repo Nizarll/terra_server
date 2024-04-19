@@ -7,6 +7,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
+import java.util.HashMap;
 
 import assets.libs.Window;
 import assets.libs.Entity;
@@ -26,7 +27,7 @@ public class Main {
     public static boolean has_connected = false;
     public static boolean has_asked = false;
     public static Entity player = null;
-
+    public static HashMap<Byte, Entity> entites = new HashMap<>();
     public static void handle_packet(ReceivePacket p) {
         byte type = p.get_type();
         System.out.println("type is : " + type);
@@ -37,17 +38,22 @@ public class Main {
             return;
         }
         if (type == Packet.STATE) {
-            // byte state = p.holder.getData()[1];
             byte uid = (byte) ((long) (p.holder.getData()[2] & 0xffffffffL));
-            // byte dir = p.holder.getData()[3];
             Vector2 pos = new Vector2(((p.holder.getData()[4] & 0xFF) | ((p.holder.getData()[5] & 0xFF) << 8)),
                     ((p.holder.getData()[6] & 0xFF) | ((p.holder.getData()[7] & 0xFF) << 8)));
-
-            if (player != null && player.uid == uid) {
+            if (player == null) return;
+            if (player.uid == uid) {
+                System.err.println("INFO : PLAYER STATE");
                 player.set_position(pos);
-                System.out.println("position is : " + pos.toString());
+            } else {
+                System.err.println("INFO : OTHER PLAYER STATE");
+                if (entites.get((Byte)uid) != null) {
+                    entites.get((Byte)uid).set_position(pos);
+                    return;
+                }
+                entites.put((Byte)uid, new Entity(uid, pos));
             }
-            return; // ???
+            return;
         }
     }
 
@@ -55,7 +61,7 @@ public class Main {
         byte[] buffer = new byte[1];
         buffer[0] = Packet.DEMAND_CON;
         try {
-            socket.setSoTimeout(4000);
+            socket.setSoTimeout(1);
         } catch (Exception e) {
             throw new Exception("Could not set the socket timeout");
         }
@@ -69,6 +75,9 @@ public class Main {
                 handle_packet(p);
                 System.out.println("Successfully connected\n\tpacket received : " + p.holder.getData()[0]);
                 has_connected = true;
+                try {
+                    Thread.sleep(400);
+                } catch (Exception e) {}
             } catch (IOException e) {
                 System.out.println("packet time out");
             }
@@ -127,21 +136,57 @@ public class Main {
                 try {
                     packet.receive();
                     handle_packet(packet);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    // System.out.println("Could not receive server packet !");
-                }
+                } catch (Exception e) {}
             }
 
             @Override
             public void render(Graphics g) {
                 if (player != null) {
+                    if (player.last == null) {
+                        player.last = new Vector2(
+                            player.get_position().get_x() - 15,
+                            player.get_position().get_y() - 15 + 400);
                     g.drawRect(
                             player.get_position().get_x() - 15,
-                            this.getHeight() / +player.get_position().get_y() - 15,
+                            player.get_position().get_y() - 15 + 400,
                             30,
                             30);
+                    } else {
+                    Vector2 pos = Vector2.lerp(player.last,
+                        new Vector2(
+                            player.get_position().get_x() - 15,
+                            player.get_position().get_y() - 15 + 400
+                    ), .3f);
+                    g.drawRect(
+                            pos.get_x(),
+                            pos.get_y(),
+                            30,
+                            30);
+                            player.last = pos;
+                    }
                 }
+                entites.forEach((_uid, entity) -> {
+                        if (entity.last == null) {
+                            g.drawRect(
+                                entity.get_position().get_x() - 15,
+                                entity.get_position().get_y() - 15 + 400,
+                                30,
+                                30);
+                            entity.last = new Vector2(
+                                                    entity.get_position().get_x() - 15,
+                                                    entity.get_position().get_y() - 15 + 400);
+                } else {
+                         g.drawRect(
+                            entity.last.get_x(),
+                            entity.last.get_y(),
+                            30,
+                            30);
+                            entity.last = Vector2.lerp(entity.last,
+                                                    new Vector2(entity.get_position().get_x() - 15,
+                                                       entity.get_position().get_y() - 15 + 400),
+                                                       .3f);
+                        }
+                });
             }
         };
         Window window = new Window(game_panel);
