@@ -21,12 +21,17 @@ public class Vector2 {
         this.x = value.x;
         this.y = value.y;
     };
+
+    public long magnitude() {
+       return (long)Math.sqrt(Math.pow((double)this.get_x(), 2) + Math.pow((double)this.get_y(), 2));
+    }
+
     public static Vector2 lerp(Vector2 a, Vector2 b, float t) {
         return new Vector2(
             (int)(a.get_x() + t * (b.get_x() - a.get_x())),
             (int)(a.get_y() + t * (b.get_y() - a.get_y()))
         );
-    }
+    };
     @Override
     public String toString() {
         return "Vector2 { x : " + this.x + ", y : " + this.y + " }";

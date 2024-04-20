@@ -23,12 +23,9 @@ public class Window {
     }
     public JPanel build() {
         JFrame jframe = new JFrame();
-        jframe.setBackground(new Color(255, 255, 255));
-        jframe.setForeground(new Color(255, 255, 255));
         jframe.setSize(new Dimension((int) SCREEN_WIDTH, (int) SCREEN_HEIGHT));
         jframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         jframe.setResizable(true);
-        jframe.setVisible(true);
         listeners.forEach(listener -> {
             jframe.addKeyListener(listener);
         });
@@ -39,7 +36,10 @@ public class Window {
         Menu m = new Menu(jframe, _e -> {
             jframe.add(panel);
         });
+        m.setBackground(new Color(255, 255, 255));
+        m.setForeground(new Color(255, 255, 255));
         jframe.add(m);
+        jframe.setVisible(true);
         return panel;
     }
 

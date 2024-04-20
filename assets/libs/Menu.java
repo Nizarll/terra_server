@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Image;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -14,6 +15,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 
 import javax.swing.Timer;
+import javax.tools.Tool;
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -33,10 +35,13 @@ public class Menu extends JPanel {
     private double s = 0;
     private Vector2 position;
     private Vector2 size = new Vector2(1, 1);
+
     public double easeInOutQuad(double x) {
         return (x < 0.5) ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2;
     }
+
     private Menu menu;
+
     public Menu(JFrame frame, Consumer action) {
         this.menu = this;
         try {
@@ -46,30 +51,35 @@ public class Menu extends JPanel {
             e.printStackTrace();
         }
         this.addMouseListener(new MouseAdapter() {
-           @Override
-           public void mousePressed(MouseEvent e) {
-            Thread t = new Thread(new Runnable(){
-                @Override
-                public void run() {
-                    s = .25;
-                    try {Thread.sleep(100);
-                    s = 0;
-                    Thread.sleep(100);
-                    } catch (Exception e){}
-                    frame.remove(menu);
-                    action.accept(null);
-                }
-            });
-            t.start();
-           } 
+            @Override
+            public void mousePressed(MouseEvent e) {
+                Thread t = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        s = .25;
+                        try {
+                            Thread.sleep(100);
+                            s = -1;
+                            Thread.sleep(100);
+                        } catch (Exception e) {
+                        }
+                        frame.remove(menu);
+                        action.accept(null);
+                    }
+                });
+                t.start();
+            }
         });
         this.addMouseMotionListener(new MouseMotionAdapter() {
             private double i = 0;
+
             @Override
             public void mouseMoved(MouseEvent e) {
                 if (Math.abs(e.getX() - position.get_x() - WIDTH / 2) < 500
-                        && Math.abs(e.getY() - position.get_y()) < 120) s = .1;
-                else s = 0;
+                        && Math.abs(e.getY() - position.get_y()) < 120)
+                    s = .1;
+                else
+                    s = 0;
                 System.out.println("mouse pos : magn" + Math.abs(e.getX() - position.get_x()));
             }
         });
@@ -109,21 +119,24 @@ public class Menu extends JPanel {
             }
         });
         curr.start();
-        this.position = new Vector2(getWidth() / 2 - WIDTH / 2, getHeight() / 2);
-        paint(getGraphics());
+        this.position = new Vector2(getWidth() / 2, getHeight() / 2);
     }
 
+    @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
+        size.set_value(Vector2.lerp(
+            size,
+            new Vector2(
+                (int) ((WIDTH + s * WIDTH) * (getWidth() / Toolkit.getDefaultToolkit().getScreenSize().getWidth())),
+                (int) ((HEIGHT + s * HEIGHT) * ((getHeight()) / Toolkit.getDefaultToolkit().getScreenSize().getHeight()))
+            ),
+                .3f));
         position.set_value(Vector2.lerp(position,
-                new Vector2((int) (getWidth() / 2 - WIDTH / 2.0f),
+                new Vector2((int) (getWidth() / 2 - size.get_x()/ 2.0f),
                         (int) (getHeight() / 2 + this.y)),
                 .3f));
-        size.set_value(Vector2.lerp(size,
-                    new Vector2((int) (WIDTH + s * WIDTH),
-                    (int) (HEIGHT + s * HEIGHT)),
-                .3f));
-        if (title != null)
+        if (title != null && size.magnitude() > -.3)
             g.drawImage(title,
                     position.get_x(),
                     position.get_y(),
